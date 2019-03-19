@@ -6,17 +6,17 @@ sudo: false
 
 branches:
 only:
-- master
+-master
 
 cache:
 directories:
-- node_modules
+-node_modules
 
 install:
-- npm install -g yarn
+-npm install -g yarn
 
 script:
-- npm run-script build
+-npm run-script build
 deploy:
 provider: pages
 skip_cleanup: true
