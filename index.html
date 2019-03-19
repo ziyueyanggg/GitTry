@@ -1,0 +1,79 @@
+<html>
+  <head>
+    <title>Plain HTML Sandbox</title>
+  </head>
+  <body>
+    <div id="app">
+      <b>What's on your mind today, my fellow Minions?</b> <br />
+      <br />
+      Tell me your name:
+      <input
+        v-model.trim="username"
+        @keyup.enter="updateUser"
+        placeholder="Add username"
+      /><br />
+      <br />
+      <input
+        v-model.trim="newTodoText"
+        @keyup.enter="addTodo"
+        placeholder="Gru is awesome"
+      />
+      <button @click="addTodo">Add</button>
+      <ul>
+        <li v-for="todo in todos">
+          <input
+            :value="todo.text"
+            :disabled="username!=todo.username"
+            @input="updateTodoText(todo, $event.target.value)"
+          />
+          <button v-if="username==todo.username" @click="removeTodo(todo)">
+            X
+          </button>
+          by {{todo.username}}
+        </li>
+      </ul>
+    </div>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://gstatic.com/firebasejs/4.2.0/firebase.js"></script>
+    <script src="https://unpkg.com/vuefire/dist/vuefire.js"></script>
+    <script>
+      var db = firebase
+        .initializeApp({
+          databaseURL: "https://project-with-a-boring-name.firebaseio.com/"
+        })
+        .database();
+      var todosRef = db.ref("todosWithUsername");
+      new Vue({
+        el: "#app",
+        data: {
+          newTodoText: "",
+          username: "Minion1"
+        },
+        firebase: {
+          todos: todosRef.limitToLast(25)
+        },
+        methods: {
+          addTodo: function() {
+            if (this.newTodoText) {
+              todosRef.push({
+                text: this.newTodoText,
+                username: this.username
+              });
+              this.newTodoText = "";
+            }
+          },
+          updateTodoText: function(todo, newText) {
+            todosRef
+              .child(todo[".key"])
+              .child("text")
+              .set(newText);
+          },
+          updateUser: function() {},
+          removeTodo: function(todo) {
+            todosRef.child(todo[".key"]).remove();
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
